@@ -8,17 +8,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.os.bundleOf
+import androidx.leanback.widget.Presenter
 import androidx.navigation.fragment.findNavController
-import com.example.truelove.LoveModel
+import com.example.truelove.model.LoveModel
 import com.example.truelove.R
-import com.example.truelove.RetrofitService
+import com.example.truelove.model.RetrofitService
 import com.example.truelove.databinding.FragmentCalculateBinding
+import com.example.truelove.presenter.MainPresenter
+import com.example.truelove.ui.view.LoveView
 import retrofit2.Call
 import retrofit2.Response
 
-class CalculateFragment : Fragment() {
+class CalculateFragment : Fragment(), LoveView {
 
     private lateinit var binding: FragmentCalculateBinding
+    private val presenter = MainPresenter(this)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,27 +40,29 @@ class CalculateFragment : Fragment() {
     private fun initClickers() {
         with(binding) {
             btnCalculate.setOnClickListener {
-                RetrofitService().api.countCompatibility(
-                    etFirstname.text.toString(),
-                    etSecondname.text.toString()
-                ).enqueue(object :retrofit2.Callback<LoveModel>{
-                    override fun onResponse(call: Call<LoveModel>, response: Response<LoveModel>) {
-                        if (response.isSuccessful){
-                            Log.e("ololo","onResponse: ${response.body()}")
-                            findNavController().navigate(R.id.resultFragment, bundleOf("result" to response.body()))
-                        }
-                        etFirstname.text.clear()
-                        etSecondname.text.clear()
-
-                    }
-
-                    override fun onFailure(call: Call<LoveModel>, t: Throwable) {
-                        Toast.makeText(requireContext(),"OnFailure: ${t.message}",Toast.LENGTH_SHORT).show()
-                    }
-
-                })
+                presenter.getLoveResult(etFirstname.text.toString(), etSecondname.text.toString())
             }
+            containerHistory.setOnClickListener {
+                findNavController().navigate(R.id.historyFragment)
+            }
+
         }
+    }
+
+
+    override fun changeFragment(loveModel: LoveModel) {
+        findNavController().navigate(R.id.resultFragment, bundleOf(MODEL_KEY to loveModel))
+
+        binding.etFirstname.text.clear()
+        binding.etSecondname.text.clear()
+    }
+
+    override fun showError(error: String) {
+        Toast.makeText(requireContext(),error, Toast.LENGTH_SHORT).show()
+    }
+
+    companion object {
+        val MODEL_KEY = "model.key"
     }
 
 

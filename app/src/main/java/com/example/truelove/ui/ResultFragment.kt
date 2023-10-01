@@ -6,13 +6,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
-import com.example.truelove.LoveModel
 import com.example.truelove.R
+import com.example.truelove.model.LoveModel
 import com.example.truelove.databinding.FragmentResultBinding
+import com.example.truelove.presenter.ResultPresenter
+import com.example.truelove.ui.CalculateFragment.Companion.MODEL_KEY
+import com.example.truelove.ui.view.ResultView
 
-class ResultFragment : Fragment() {
+class ResultFragment : Fragment(), ResultView {
 
     private lateinit var binding: FragmentResultBinding
+    private val presenter = ResultPresenter(this)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,20 +33,38 @@ class ResultFragment : Fragment() {
     }
 
     private fun getResult() {
-        with(binding){
-            val result = arguments?.getSerializable("result") as LoveModel
-            tvFirstname.text = result.firstName
-            tvSecondname.text = result.secondName
-            tvPercent.text = result.percentage
-        }
+        val result = arguments?.getSerializable(MODEL_KEY) as LoveModel
+        presenter.getData(result)
+
 
     }
 
     private fun initListeners() {
-        with(binding){
+        with(binding) {
             btnTryAgain.setOnClickListener {
                 findNavController().navigateUp()
             }
+            imgHistory.setOnClickListener {
+                findNavController().navigate(R.id.historyFragment)
+            }
+            imgHome.setOnClickListener {
+                findNavController().navigate(R.id.calculateFragment)
+            }
         }
+    }
+
+
+    override fun showLove(
+        firstName: String,
+        secondName: String,
+        percentage: String,
+    ) {
+        with(binding) {
+            tvFirstname.text = firstName
+            tvSecondname.text = secondName
+            tvPercent.text = percentage
+        }
+
+
     }
 }

@@ -1,4 +1,4 @@
-package com.example.truelove
+package com.example.truelove.model
 
 import retrofit2.Call
 import retrofit2.http.GET
